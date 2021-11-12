@@ -11,8 +11,18 @@ public class FitService {
         this.userDao = userDao;
     }
 
+    public double getSpeed(double way, double time) {
+        double formatTime = (time / 60);
+        return way / formatTime;
+    }
+
+    public double getFormatResult(double value) {
+        double scale = Math.pow(10, 3);
+        return Math.ceil(value * scale) / scale;
+    }
+
     public double stepLenghtForWalk(long id) {
-        return userDao.getUserById(id).getHeight() / 4 + 37;
+        return(double)userDao.getUserById(id).getHeight() / 4 + 37;
     }
 
     public double stepLenghtForRun(long id) {
@@ -29,11 +39,10 @@ public class FitService {
         return getFormatResult((steps * length) / 100000);
     }
 
-    public double getCalories(long id, double way, double time) {
+    public double getCaloriesAfterWalk(long id, double way, double time) {
         double formatTime = time/60;
         double speed = getSpeed(way, time);
         int weight = userDao.getUserById(id).getWeight();
-        //int height = userDao.getUserById(id).getHeight();
         if (speed < 4) {
             return (1.5 * weight) * formatTime;
         } else if (speed >= 4 && speed < 6) {
@@ -46,17 +55,9 @@ public class FitService {
         return 0;
     }
 
-//return 0.035 * weight + (speed * speed / height) * 0.029 * weight;
-
-
-    public double getSpeed(double way, double time) {
-        double formatTime = (time / 60);
-        return way / formatTime;
-    }
-
-    public double getFormatResult(double value) {
-        double scale = Math.pow(10, 3);
-        return Math.ceil(value * scale) / scale;
+    public double getCaloriesAfterRun(long id, double way){
+        int weight = userDao.getUserById(id).getWeight();
+        return weight*way;
     }
 
 
