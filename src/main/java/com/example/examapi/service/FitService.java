@@ -40,19 +40,11 @@ public class FitService {
     }
 
     public double getCaloriesAfterWalk(long id, double way, double time) {
-        double formatTime = time/60;
         double speed = getSpeed(way, time);
         int weight = userDao.getUserById(id).getWeight();
-        if (speed < 4) {
-            return (1.5 * weight) * formatTime;
-        } else if (speed >= 4 && speed < 6) {
-            return (3.2 * weight) * formatTime;
-        } else if (speed >= 6 && speed < 8) {
-            return (4.5 * weight) * formatTime;
-        } else if (speed >= 8 && speed <= 10) {
-            return (10 * weight) * formatTime;
-        }
-        return 0;
+        int height = userDao.getUserById(id).getHeight();
+        double result = 0.035 * weight + ((speed*speed)/height) * 0.029 * weight;
+        return result*time;
     }
 
     public double getCaloriesAfterRun(long id, double way){

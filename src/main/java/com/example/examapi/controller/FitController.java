@@ -1,6 +1,5 @@
 package com.example.examapi.controller;
 
-import com.example.examapi.entity.History;
 import com.example.examapi.service.FitService;
 import com.example.examapi.service.HistoryService;
 import org.springframework.http.HttpStatus;
