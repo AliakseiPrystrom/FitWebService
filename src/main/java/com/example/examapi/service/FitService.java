@@ -1,15 +1,20 @@
 package com.example.examapi.service;
 
-import com.example.examapi.dao.UserDao;
+import com.example.examapi.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class FitService {
-    private final UserDao userDao;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private HistoryService historyService;
 
-    public FitService(UserDao userDao) {
-        this.userDao = userDao;
-    }
 
     public double getSpeed(double way, double time) {
         double formatTime = (time / 60);
@@ -22,11 +27,11 @@ public class FitService {
     }
 
     public double stepLenghtForWalk(long id) {
-        return(double)userDao.getUserById(id).getHeight() / 4 + 37;
+        return (double) userRepository.getById(id).getHeight() / 4 + 37;
     }
 
     public double stepLenghtForRun(long id) {
-        return userDao.getUserById(id).getHeight() * 0.65;
+        return userRepository.getById(id).getHeight() * 0.65;
     }
 
     public double getDayResultWalkInKm(long id, int steps) {
@@ -34,23 +39,51 @@ public class FitService {
         return getFormatResult((steps * length) / 100000);
     }
 
-    public double getResultRunInKm(long id, int steps) {
-        double length = stepLenghtForRun(id);
-        return getFormatResult((steps * length) / 100000);
-    }
 
     public double getCaloriesAfterWalk(long id, double way, double time) {
         double speed = getSpeed(way, time);
-        int weight = userDao.getUserById(id).getWeight();
-        int height = userDao.getUserById(id).getHeight();
-        double result = 0.035 * weight + ((speed*speed)/height) * 0.029 * weight;
-        return result*time;
+        int weight = userRepository.getById(id).getWeight();
+        int height = userRepository.getById(id).getHeight();
+        double result = 0.035 * weight + ((speed * speed) / height) * 0.029 * weight;
+        return result * time;
     }
 
-    public double getCaloriesAfterRun(long id, double way){
-        int weight = userDao.getUserById(id).getWeight();
-        return weight*way;
+
+    public String type(double speed) {
+        if (speed < 7) {
+            return "walk";
+        } else return "running";
     }
 
+    public String getDate() {
+        Date date = new Date();
+        return date.toString();
+
+    }
+
+    public Map<Double, Double> getTotal(long id, int steps, double time) {
+        Map<Double, Double> map = new HashMap<>();
+        double way = getDayResultWalkInKm(id, steps);
+        double speed = getSpeed(way, time);
+        double calories = getCaloriesAfterWalk(id, way, time);
+        String type = type(getSpeed(way, time));
+        String date = getDate();
+        map.put(way, calories);
+        historyService.save(historyService.getHistoryDTO(date, type, way, speed, calories));
+        return map;
+    }
+
+//        public double getResultRunInKm(long id, int steps) {
+//        double length = stepLenghtForRun(id);
+//        return getFormatResult((steps * length) / 100000);
+//    }
+
+//        public double getCaloriesAfterRun(long id, double way) {
+//        int weight = userRepository.getById(id).getWeight();
+//        return weight * way;
+//    }
 
 }
+
+
+
